@@ -1,4 +1,4 @@
 # dokumentasi
 
-- [istalasi arch linux](install-arch.md)
+- [instalasi arch linux](install-arch.md)
 - [setup btrfs](Setup-btrfs.md)

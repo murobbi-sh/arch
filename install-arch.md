@@ -15,8 +15,8 @@
 
 * Gunakan:
 
-  * Rufus (Windows)
-  * Ventoy (multi-ISO, recommended)
+  * [Rufus](https://rufus.ie/id/) (Windows)
+  * [Ventoy](https://www.ventoy.net) (multi-ISO, recommended)
 
 ### Boot ke Live ISO
 

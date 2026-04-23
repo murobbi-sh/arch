@@ -243,6 +243,5 @@ snapper -c home create-config /home
 
 ## Related
 
-- Snapper
-- Btrfs
-- GRUB
+- [Snapper](https://wiki.archlinux.org/title/Snapper)
+- [Btrfs](https://wiki.archlinux.org/title/Btrfs)
