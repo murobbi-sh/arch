@@ -243,5 +243,6 @@ snapper -c home create-config /home
 
 ## Related
 
-- [Snapper](https://wiki.archlinux.org/title/Snapper)
-- [Btrfs](https://wiki.archlinux.org/title/Btrfs)
+
+- <a href="https://wiki.archlinux.org/title/Snapper" target="_blank" rel="noopener noreferrer">Snapper</a>
+- <a href="https://wiki.archlinux.org/title/Btrfs" target="_blank" rel="noopener noreferrer">Btrfs</a>

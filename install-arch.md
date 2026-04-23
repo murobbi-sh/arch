@@ -9,14 +9,15 @@
 
 ### Download ISO
 
-* Ambil dari: [https://archlinux.org/download/](https://archlinux.org/download/)
+* Ambil dari: <a href="https://archlinux.org/download/" target="_blank" rel="noopener noreferrer">https://archlinux.org/download/</a>
 
 ### Buat Bootable USB
 
 * Gunakan:
 
-  * [Rufus](https://rufus.ie/id/) (Windows)
-  * [Ventoy](https://www.ventoy.net) (multi-ISO, recommended)
+  * Rufus : <a href="https://rufus.ie/id/" target="_blank" rel="noopener noreferrer">https://rufus.ie/id/</a>
+ 
+  * Ventoy (multi-ISO, recommended) : <a href="https://www.ventoy.net" target="_blank" rel="noopener noreferrer">https://www.ventoy.net</a>
 
 ### Boot ke Live ISO
 
@@ -153,7 +154,7 @@ mount /dev/nvme0n1p1 /mnt/boot
 pacstrap /mnt base linux linux-firmware
 "
 base = Paket dasar dari sistem. Berisi core utilities (bash, coreutils, dll) agar sistem bisa boot
-linux =Kernel utama Linux. Berfungsi sebagai penghubung antara hardware dan software.
+linux =Kernel utama Linux. penghubung antara hardware dan software.
 linux-firmware = Firmware untuk berbagai perangkat keras (wifi, GPU, bluetooth, dll).
 nano = Text editor sederhana berbasis terminal.
 neovim = Text editor modern (fork dari vim).
@@ -361,13 +362,5 @@ reboot
 
 # Related
 
-* Arch Wiki: [https://wiki.archlinux.org/](https://wiki.archlinux.org/)
-* Installation Guide: [https://wiki.archlinux.org/title/Installation_guide](https://wiki.archlinux.org/title/Installation_guide)
-
----
-
-Kalau kamu mau next step, kita bisa lanjut bikin:
-
-* 🔥 **Post-install (Hyprland setup clean)**
-* ⚡ **Dotfiles structure biar scalable**
-* 🧠 **Versi advanced (btrfs + snapshot + rollback)**
+* arch wiki : <a href="https://wiki.archlinux.org/" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org</a>
+* Installation Guide : <a href="https://wiki.archlinux.org/title/Installation_guide" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org/title/Installation_guide</a>
