@@ -15,9 +15,14 @@
 
 * Gunakan:
 
+<<<<<<< HEAD
   * Rufus : <a href="https://rufus.ie/id/" target="_blank" rel="noopener noreferrer">https://rufus.ie/id/</a>
  
   * Ventoy (multi-ISO, recommended) : <a href="https://www.ventoy.net" target="_blank" rel="noopener noreferrer">https://www.ventoy.net</a>
+=======
+  * Rufus (Windows)
+  * Ventoy (multi-ISO, recommended)
+>>>>>>> parent of 371f29d (tambah link)
 
 ### Boot ke Live ISO
 

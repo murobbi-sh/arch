@@ -243,6 +243,12 @@ snapper -c home create-config /home
 
 ## Related
 
+<<<<<<< HEAD
 
 - <a href="https://wiki.archlinux.org/title/Snapper" target="_blank" rel="noopener noreferrer">Snapper</a>
 - <a href="https://wiki.archlinux.org/title/Btrfs" target="_blank" rel="noopener noreferrer">Btrfs</a>
+=======
+- Snapper
+- Btrfs
+- GRUB
+>>>>>>> parent of 371f29d (tambah link)
