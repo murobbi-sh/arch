@@ -340,15 +340,8 @@ reboot
 ---
 
 # Catatan
-
-- Pastikan boot mode = **UEFI**, bukan Legacy
-- Jika pakai SSD, disarankan gunakan:
-
-  ```
-  noatime,compress=zstd
-  ```
-
 - Untuk setup lanjut:
+  - setup btrfs : <a href="Setup-btrfs.md" target="_blank" rel="noopener noreferrer">Setup-btrfs.md</a>
   - Desktop Environment (Hyprland, GNOME, KDE)
   - Audio (PipeWire)
   - GPU driver
