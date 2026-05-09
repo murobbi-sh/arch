@@ -9,25 +9,18 @@
 
 ### Download ISO
 
-* Ambil dari: <a href="https://archlinux.org/download/" target="_blank" rel="noopener noreferrer">https://archlinux.org/download/</a>
+- Ambil dari: <a href="https://archlinux.org/download/" target="_blank" rel="noopener noreferrer">https://archlinux.org/download/</a>
 
 ### Buat Bootable USB
 
-* Gunakan:
-
-<<<<<<< HEAD
-  * Rufus : <a href="https://rufus.ie/id/" target="_blank" rel="noopener noreferrer">https://rufus.ie/id/</a>
- 
-  * Ventoy (multi-ISO, recommended) : <a href="https://www.ventoy.net" target="_blank" rel="noopener noreferrer">https://www.ventoy.net</a>
-=======
-  * Rufus (Windows)
-  * Ventoy (multi-ISO, recommended)
->>>>>>> parent of 371f29d (tambah link)
+- Gunakan:
+  - Rufus : <a href="https://rufus.ie/id/" target="_blank" rel="noopener noreferrer">https://rufus.ie/id/</a>
+  - Ventoy (multi-ISO, recommended) : <a href="https://www.ventoy.net" target="_blank" rel="noopener noreferrer">https://www.ventoy.net</a>
 
 ### Boot ke Live ISO
 
-* Masuk BIOS/UEFI → pilih USB
-* Pilih: `Arch Linux install medium`
+- Masuk BIOS/UEFI → pilih USB
+- Pilih: `Arch Linux install medium`
 
 ---
 
@@ -88,11 +81,11 @@ Contoh target:
 cfdisk /dev/nvme0n1
 ```
 
-* Buat:
+- Buat:
+  - `/dev/nvme0n1p1` → EFI
+  - `/dev/nvme0n1p2` → Root
 
-  * `/dev/nvme0n1p1` → EFI
-  * `/dev/nvme0n1p2` → Root
-* Pilih **Write** → lalu Quit
+- Pilih **Write** → lalu Quit
 
 ---
 
@@ -140,13 +133,14 @@ umount /mnt
 Mount ulang:
 
 ```bash
-mount -o compress=zstd,subvol=@ /dev/nvme0n1p2 /mnt
+mount -o noatime,compress=zstd,ssd,discard=async,subvol=@ /dev/nvme0n1p2 /mnt
 mkdir -p /mnt/{boot,home,.snapshots,var/cache,var/log,tmp}
 
 mount -o noatime,compress=zstd,ssd,discard=async,subvol=@home /dev/nvme0n1p2 /mnt/home
 mount -o noatime,compress=zstd,ssd,discard=async,subvol=@snapshots /dev/nvme0n1p2 /mnt/.snapshots
 mount -o noatime,compress=zstd,ssd,discard=async,subvol=@cache /dev/nvme0n1p2 /mnt/var/cache
 mount -o noatime,compress=zstd,ssd,discard=async,subvol=@log /dev/nvme0n1p2 /mnt/var/log
+mount -o noatime,compress=zstd,ssd,discard=async,subvol=@log /dev/nvme0n1p2 /mnt/tmp
 
 mount /dev/nvme0n1p1 /mnt/boot
 ```
@@ -167,10 +161,6 @@ sudo = Memberikan akses root sementara ke user biasa.
 networkmanager = Service untuk mengelola koneksi jaringan (wifi & ethernet).
 git = Version control system. untuk clone repository dan manajemen kode.
 bash-completion = auto complete comand
-pipewire         = Audio server modern (pengganti PulseAudio & JACK).
-pipewire-alsa    = Layer kompatibilitas untuk ALSA.
-pipewire-pulse   = Layer kompatibilitas untuk PulseAudio.
-pipewire-jack    = Layer kompatibilitas untuk JACK (audio profesional).
 "
 ```
 
@@ -351,21 +341,21 @@ reboot
 
 # Catatan
 
-* Pastikan boot mode = **UEFI**, bukan Legacy
-* Jika pakai SSD, disarankan gunakan:
+- Pastikan boot mode = **UEFI**, bukan Legacy
+- Jika pakai SSD, disarankan gunakan:
 
   ```
   noatime,compress=zstd
   ```
-* Untuk setup lanjut:
 
-  * Desktop Environment (Hyprland, GNOME, KDE)
-  * Audio (PipeWire)
-  * GPU driver
+- Untuk setup lanjut:
+  - Desktop Environment (Hyprland, GNOME, KDE)
+  - Audio (PipeWire)
+  - GPU driver
 
 ---
 
 # Related
 
-* arch wiki : <a href="https://wiki.archlinux.org/" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org</a>
-* Installation Guide : <a href="https://wiki.archlinux.org/title/Installation_guide" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org/title/Installation_guide</a>
+- arch wiki : <a href="https://wiki.archlinux.org/" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org</a>
+- Installation Guide : <a href="https://wiki.archlinux.org/title/Installation_guide" target="_blank" rel="noopener noreferrer">https://wiki.archlinux.org/title/Installation_guide</a>
