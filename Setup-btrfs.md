@@ -1,110 +1,183 @@
-# Btrfs + Snapper Setup  
-> Automatic snapshot & rollback system untuk Arch Linux (atau distro lain berbasis Btrfs)
+# Btrfs + Snapper Setup
+
+> Automatic snapshot & rollback system untuk Arch Linux atau distro lain berbasis Btrfs.
 
 ---
 
 ## Konsep Singkat
 
-- **Btrfs** menggunakan sistem *Copy-on-Write (CoW)*  
-- Snapshot **bukan full copy**, tapi hanya menyimpan perubahan  
-- Snapshot:
-  - ⚡ cepat dibuat
-  - 💾 hemat storage
-- **Snapper** = tool untuk otomatisasi snapshot & cleanup
+Btrfs menggunakan sistem **Copy-on-Write (CoW)**.
 
-> ⚠️ Snapshot ≠ Backup  
-> Jika disk rusak, semua snapshot ikut hilang
+Snapshot di Btrfs bukan full copy. Snapshot hanya menyimpan perubahan dari kondisi sebelumnya, jadi prosesnya cepat dan relatif hemat storage.
+
+Snapshot berguna untuk:
+
+- Membuat titik aman sebelum update sistem
+- Rollback ketika sistem error
+- Membandingkan perubahan file
+- Mengurangi drama setelah salah konfigurasi
+
+> [!warning]
+> Snapshot bukan backup.
+> Kalau disk rusak, snapshot juga ikut hilang. Jadi tetap butuh backup eksternal atau cloud kalau datanya penting.
 
 ---
 
 ## Install Package
 
-Jalankan setelah install system:
+Jalankan setelah sistem Arch Linux terinstall.
+
+```bash
+sudo pacman -S snapper btrfs-progs
+```
+
+Kalau masih di dalam `arch-chroot`, tidak perlu pakai `sudo`:
 
 ```bash
 pacman -S snapper btrfs-progs
-````
+```
 
 ---
 
 ## Struktur Subvolume
 
-Pastikan kamu punya struktur seperti ini:
+Struktur yang direkomendasikan:
 
-```
+```text
 @
 @home
 @snapshots
 @cache
 @log
+@tmp
 ```
 
-Cek dengan:
+Cek subvolume:
 
 ```bash
-btrfs subvolume list /
+sudo btrfs subvolume list /
 ```
 
-Kalau belum ada:
+Kalau mengikuti guide instalasi sebelumnya, subvolume `.snapshots` sudah dibuat sebagai `@snapshots`.
+
+---
+
+## Cek Mount `.snapshots`
+
+Pastikan `.snapshots` sudah menjadi mount point sendiri:
 
 ```bash
-btrfs subvolume create /.snapshots
+findmnt /.snapshots
+```
+
+Kalau hasilnya kosong, berarti `.snapshots` belum ke-mount.
+
+Cek juga isi `fstab`:
+
+```bash
+cat /etc/fstab
+```
+
+Contoh mount yang benar:
+
+```fstab
+UUID=xxx /           btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@          0 0
+UUID=xxx /home       btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@home      0 0
+UUID=xxx /.snapshots btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@snapshots 0 0
+UUID=xxx /var/cache  btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@cache     0 0
+UUID=xxx /var/log    btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@log       0 0
+UUID=xxx /tmp        btrfs rw,noatime,compress=zstd,ssd,discard=async,subvol=@tmp       0 0
+```
+
+> [!warning]
+> Jangan sampai `/tmp` pakai `subvol=@log`.
+> Itu bukan setup keren, itu setup minta ditampar error.
+
+---
+
+## Setup Snapper untuk Root
+
+Buat konfigurasi root:
+
+```bash
+sudo snapper -c root create-config /
+```
+
+Command ini akan membuat:
+
+```text
+/etc/snapper/configs/root
+```
+
+Snapper juga biasanya akan mencoba membuat folder `.snapshots`.
+
+Kalau kamu sudah punya subvolume `@snapshots` yang dimount ke `/.snapshots`, pastikan setelah command ini struktur mount masih benar.
+
+Cek:
+
+```bash
+findmnt /.snapshots
+sudo btrfs subvolume list /
 ```
 
 ---
 
-## Setup Snapper (Root)
-
-Buat konfigurasi:
+## Fix Permission `.snapshots`
 
 ```bash
-snapper -c root create-config /
+sudo chmod 750 /.snapshots
+sudo chown :wheel /.snapshots
 ```
 
-Ini akan:
+Artinya:
 
-- Membuat config di `/etc/snapper/configs/root`
-- Setup `.snapshots` (bisa override manual setup)
+- Owner tetap `root`
+- Group menjadi `wheel`
+- User di group `wheel` bisa akses sesuai permission
 
 ---
 
-## 🔐 Fix Permission
+## Enable Auto Snapshot
+
+Aktifkan timer Snapper:
 
 ```bash
-chmod 750 /.snapshots
-chown :wheel /.snapshots
+sudo systemctl enable --now snapper-timeline.timer
+sudo systemctl enable --now snapper-cleanup.timer
+```
+
+Cek status:
+
+```bash
+systemctl status snapper-timeline.timer
+systemctl status snapper-cleanup.timer
 ```
 
 ---
 
-## ⏱️ Enable Auto Snapshot
+## Default Behavior Snapper
 
-```bash
-systemctl enable --now snapper-timeline.timer
-systemctl enable --now snapper-cleanup.timer
-```
+Secara umum Snapper bisa membuat snapshot otomatis berdasarkan timeline:
 
-### Default Behavior
+- Hourly
+- Daily
+- Weekly
+- Monthly
+- Yearly
 
-- Snapshot:
-    - tiap jam
-    - harian
-    - mingguan
-    - bulanan
-- Cleanup otomatis berdasarkan limit
-    
+Snapshot lama akan dibersihkan otomatis oleh cleanup timer berdasarkan konfigurasi limit.
 
 ---
 
-## Konfigurasi (Optional)
+## Konfigurasi Snapper
 
-Edit:
+Edit config root:
 
 ```bash
-nano /etc/snapper/configs/root
+sudo nano /etc/snapper/configs/root
 ```
 
-Contoh:
+Contoh konfigurasi yang lebih santai:
 
 ```ini
 TIMELINE_CREATE="yes"
@@ -114,7 +187,25 @@ TIMELINE_LIMIT_HOURLY="5"
 TIMELINE_LIMIT_DAILY="7"
 TIMELINE_LIMIT_WEEKLY="4"
 TIMELINE_LIMIT_MONTHLY="3"
+TIMELINE_LIMIT_YEARLY="0"
+
+NUMBER_CLEANUP="yes"
+NUMBER_LIMIT="10"
+NUMBER_LIMIT_IMPORTANT="5"
 ```
+
+Penjelasan singkat:
+
+| Opsi | Fungsi |
+| ---- | ------ |
+| `TIMELINE_CREATE` | Mengaktifkan snapshot otomatis berdasarkan waktu |
+| `TIMELINE_CLEANUP` | Membersihkan snapshot timeline lama |
+| `TIMELINE_LIMIT_HOURLY` | Batas snapshot per jam |
+| `TIMELINE_LIMIT_DAILY` | Batas snapshot harian |
+| `TIMELINE_LIMIT_WEEKLY` | Batas snapshot mingguan |
+| `TIMELINE_LIMIT_MONTHLY` | Batas snapshot bulanan |
+| `NUMBER_LIMIT` | Batas snapshot manual biasa |
+| `NUMBER_LIMIT_IMPORTANT` | Batas snapshot yang ditandai important |
 
 ---
 
@@ -123,132 +214,332 @@ TIMELINE_LIMIT_MONTHLY="3"
 ### Buat snapshot
 
 ```bash
-snapper -c root create --description "before update"
+sudo snapper -c root create --description "before update"
+```
+
+Atau versi pendek:
+
+```bash
+sudo snapper create --description "before update"
 ```
 
 ### List snapshot
 
 ```bash
-snapper list
+sudo snapper list
 ```
+
+### Lihat perubahan antar snapshot
+
+```bash
+sudo snapper status 1..2
+```
+
+### Lihat diff file
+
+```bash
+sudo snapper diff 1..2
+```
+
+Ganti `1..2` sesuai nomor snapshot.
+
+---
+
+## Snapshot Sebelum Update
+
+Sebelum update sistem:
+
+```bash
+sudo snapper create --description "pre system update"
+sudo pacman -Syu
+```
+
+Kalau update aman, lanjut hidup.
+
+Kalau update rusak, baru rollback.
 
 ---
 
 ## Rollback System
 
+Rollback root:
+
 ```bash
-snapper rollback
+sudo snapper rollback
 ```
 
-📌 Yang terjadi:
+Yang terjadi:
 
-- Snapshot dijadikan root baru
+- Snapshot dipakai sebagai root baru
 - Root lama tetap disimpan sebagai snapshot
-- Perlu reboot
+- Sistem perlu reboot
 
-> ⚠️ Perubahan setelah snapshot bisa hilang
+Setelah rollback:
+
+```bash
+sudo reboot
+```
+
+> [!warning]
+> Perubahan setelah snapshot bisa hilang.
+> Jangan rollback sembarangan kalau kamu baru bikin file penting di root filesystem.
 
 ---
 
-## Integrasi GRUB (Recommended)
+## Integrasi GRUB
+
+Integrasi GRUB berguna supaya snapshot bisa muncul di menu boot.
 
 Install:
 
 ```bash
-pacman -S grub-btrfs inotify-tools
+sudo pacman -S grub-btrfs inotify-tools
 ```
 
 Enable daemon:
 
 ```bash
-systemctl enable --now grub-btrfsd
+sudo systemctl enable --now grub-btrfsd
 ```
 
-Generate config:
+Generate ulang config GRUB:
 
 ```bash
-grub-mkconfig -o /boot/grub/grub.cfg
+sudo grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-✅ Hasil:
+Hasilnya:
 
-- Snapshot muncul di menu boot
-- Bisa rollback tanpa masuk system
+- Snapshot muncul di menu GRUB
+- Bisa boot ke snapshot
+- Bisa recovery walaupun sistem utama error
 
-> ⚠️ Jika daemon mati, snapshot baru tidak muncul di GRUB
+> [!warning]
+> Jika daemon `grub-btrfsd` mati, snapshot baru bisa saja tidak muncul di menu GRUB.
+
+Cek status daemon:
+
+```bash
+systemctl status grub-btrfsd
+```
 
 ---
 
-## fstab (Penting)
+## Catatan untuk UKI
 
-Pastikan subvolume di-mount dengan benar:
+Kalau kamu pakai UKI tanpa GRUB, snapshot tidak otomatis muncul sebagai menu boot seperti di GRUB.
 
-```fstab
-UUID=xxx / btrfs subvol=@,compress=zstd,noatime 0 0
-UUID=xxx /home btrfs subvol=@home 0 0
-UUID=xxx /.snapshots btrfs subvol=@snapshots 0 0
+UKI tetap bisa dipakai dengan Btrfs + Snapper, tapi workflow rollback-nya tidak senyaman GRUB snapshot menu.
+
+Pilihan realistis:
+
+- Pakai **GRUB** kalau ingin snapshot boot menu yang gampang.
+- Pakai **UKI** kalau fokus ke Secure Boot dan setup minimal.
+- Pakai **UKI + recovery entry/manual rescue** kalau kamu sudah paham alurnya.
+
+Jadi jangan berharap UKI tiba-tiba punya menu snapshot kayak GRUB. Dia bukan dukun.
+
+---
+
+## Setup Snapper untuk `/home` Opsional
+
+Kalau `/home` dipisah sebagai subvolume, kamu bisa membuat config Snapper sendiri untuk `/home`.
+
+```bash
+sudo snapper -c home create-config /home
 ```
+
+Edit config:
+
+```bash
+sudo nano /etc/snapper/configs/home
+```
+
+Tapi hati-hati.
+
+Snapshot `/home` bisa makan storage lebih cepat kalau isinya banyak file besar seperti:
+
+- Video
+- ISO
+- Game
+- Cache browser
+- Project build
+- `node_modules`
+
+Kalau `/home` berisi banyak file barbar, jangan asal aktifin snapshot timeline terlalu agresif.
+
+---
+
+## Cleanup Manual
+
+List snapshot:
+
+```bash
+sudo snapper list
+```
+
+Hapus snapshot tertentu:
+
+```bash
+sudo snapper delete nomor_snapshot
+```
+
+Contoh:
+
+```bash
+sudo snapper delete 12
+```
+
+Hapus range:
+
+```bash
+sudo snapper delete 10-15
+```
+
+---
+
+## Cek Penggunaan Storage Btrfs
+
+```bash
+sudo btrfs filesystem usage /
+```
+
+Cek detail:
+
+```bash
+sudo btrfs filesystem df /
+```
+
+Kalau disk terlalu penuh, Btrfs bisa mulai rewel.
+
+Sisakan free space yang cukup, terutama kalau sering snapshot.
 
 ---
 
 ## Best Practice
 
-✔ Snapshot sebelum update:
-
-```bash
-snapper create --description "pre update"
-```
-
-✔ Pisahkan `/home`:
-
-```bash
-snapper -c home create-config /home
-```
-
-✔ Jaga free space disk
-
-> Btrfs butuh ruang kosong untuk performa optimal
+- Buat snapshot sebelum update besar.
+- Pisahkan `/home` dari root.
+- Jangan anggap snapshot sebagai backup.
+- Jangan biarkan disk terlalu penuh.
+- Cek snapshot lama secara berkala.
+- Backup data penting ke disk lain.
+- Gunakan GRUB kalau ingin boot snapshot dengan mudah.
 
 ---
 
 ## Common Mistakes
 
-- Tidak mount `.snapshots` sebagai subvolume
-- Disk terlalu penuh
-- Salah config `fstab`
-- Mengira snapshot = backup
+### 1. Tidak mount `.snapshots` sebagai subvolume
+
+Akibatnya snapshot bisa masuk ke root biasa, bukan ke subvolume khusus.
+
+Cek:
+
+```bash
+findmnt /.snapshots
+```
+
+---
+
+### 2. Disk terlalu penuh
+
+Btrfs butuh ruang kosong untuk kerja normal.
+
+Cek:
+
+```bash
+sudo btrfs filesystem usage /
+```
+
+---
+
+### 3. Salah config `fstab`
+
+Contoh kesalahan:
+
+```fstab
+UUID=xxx /tmp btrfs subvol=@log 0 0
+```
+
+Yang benar:
+
+```fstab
+UUID=xxx /tmp btrfs subvol=@tmp 0 0
+```
+
+---
+
+### 4. Mengira snapshot sama dengan backup
+
+Snapshot masih berada di disk yang sama.
+
+Kalau disk mati, snapshot ikut wafat.
+
+---
+
+### 5. Rollback tanpa paham efeknya
+
+Rollback bisa mengembalikan sistem ke kondisi lama.
+
+File atau konfigurasi yang dibuat setelah snapshot bisa hilang dari root filesystem.
 
 ---
 
 ## Workflow yang Direkomendasikan
 
+```text
+1. Buat snapshot sebelum update
+2. Update system
+3. Kalau aman, lanjut kerja
+4. Kalau error, rollback
+5. Reboot
 ```
-1. Update system
-2. Kalau error → rollback
-3. Kalau aman → lanjut kerja
+
+Contoh:
+
+```bash
+sudo snapper create --description "before pacman update"
+sudo pacman -Syu
+```
+
+Kalau error:
+
+```bash
+sudo snapper rollback
+sudo reboot
 ```
 
 ---
 
-## Struktur Snapshot (Ilustrasi)
+## Struktur Snapshot
 
-```
+Ilustrasi struktur snapshot:
+
+```text
 @snapshots
 ├── 1/
 ├── 2/
 ├── 3/
+└── 4/
+```
+
+Biasanya akan terlihat di:
+
+```text
+/.snapshots/
+├── 1/
+│   ├── info.xml
+│   └── snapshot/
+├── 2/
+│   ├── info.xml
+│   └── snapshot/
 ```
 
 ---
 
 ## Related
 
-<<<<<<< HEAD
-
-- <a href="https://wiki.archlinux.org/title/Snapper" target="_blank" rel="noopener noreferrer">Snapper</a>
-- <a href="https://wiki.archlinux.org/title/Btrfs" target="_blank" rel="noopener noreferrer">Btrfs</a>
-=======
-- Snapper
-- Btrfs
-- GRUB
->>>>>>> parent of 371f29d (tambah link)
+- [Arch Wiki - Snapper](https://wiki.archlinux.org/title/Snapper)
+- [Arch Wiki - Btrfs](https://wiki.archlinux.org/title/Btrfs)
+- [Arch Wiki - GRUB](https://wiki.archlinux.org/title/GRUB)
