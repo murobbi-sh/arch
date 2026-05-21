@@ -356,5 +356,7 @@ UKI lebih bersih dari GRUB, tapi kalau salah konfigurasi, error-nya bisa bikin p
 
 ## Related
 
+- [[Arch-Install]]
+- [[Boot-GRUB]]
 - Arch Wiki UKI: <https://wiki.archlinux.org/title/Unified_kernel_image>
 - Arch Wiki mkinitcpio: <https://wiki.archlinux.org/title/Mkinitcpio>

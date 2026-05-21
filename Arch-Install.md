@@ -379,7 +379,7 @@ Pakai UKI kalau kamu mau setup yang lebih modern, rapi, dan cocok buat Secure Bo
 
 Baca:
 
-- [[Boot-UKI]]
+- [Boot-UKI.md](./Boot-UKI.md)
 
 ### Opsi 2 — GRUB
 
@@ -387,7 +387,7 @@ Pakai GRUB kalau kamu mau bootloader umum, gampang dipahami, dan enak buat dual 
 
 Baca:
 
-- [[Boot-GRUB]]
+- [Boot-GRUB.md](./Boot-GRUB.md)
 
 > Pilih salah satu dulu. Jangan install dua-duanya kalau belum paham boot order, nanti BIOS jadi pasar malam.
 
@@ -421,6 +421,7 @@ Cabut USB installer ketika sistem mulai restart.
 
 Untuk setup lanjut:
 
+- [Setup-btrfs.md](./Setup-btrfs.md)
 - Desktop Environment: Hyprland, GNOME, KDE
 - Audio: PipeWire
 - GPU driver

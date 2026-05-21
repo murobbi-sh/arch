@@ -231,4 +231,6 @@ Pakai UKI kalau kamu ingin setup modern dan lebih enak buat Secure Boot.
 
 ## Related
 
-- Arch Wiki GRUB: <https://wiki.archlinux.org/title/GRUB>
+- [Arch-Install.md](./Arch-Install.md)
+- [Boot-GRUB.md](./Boot-GRUB.md)
+- [Boot-UKI.md](./Boot-UKI.md)

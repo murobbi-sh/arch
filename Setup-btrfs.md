@@ -540,6 +540,9 @@ Biasanya akan terlihat di:
 
 ## Related
 
+- [[Arch-Install]]
+- [[Boot-GRUB]]
+- [[Boot-UKI]]
 - [Arch Wiki - Snapper](https://wiki.archlinux.org/title/Snapper)
 - [Arch Wiki - Btrfs](https://wiki.archlinux.org/title/Btrfs)
 - [Arch Wiki - GRUB](https://wiki.archlinux.org/title/GRUB)
